@@ -36,23 +36,92 @@ runs:
     - name: Install required tools
       shell: bash
       run: |
-        set -e
+        set -euo pipefail  # Fail on any error, undefined var, or pipe failure
+
+        # === Update package index ===
+        echo "Updating APT package lists..."
         sudo apt-get update -y
+        # Significance: Ensures latest package metadata is available before installing
+
+        # === Install base dependencies ===
+        echo "Installing required system packages: software-properties-common, curl, ca-certificates, sudo, make"
         sudo apt-get install -y software-properties-common curl ca-certificates sudo make
+        # Significance:
+        # - software-properties-common: Needed for add-apt-repository
+        # - curl: For downloading files (keys, scripts, binaries)
+        # - ca-certificates: Ensures HTTPS certificate validation works
+        # - sudo: Required for privileged operations
+        # - make: Sometimes needed by build tools
 
-        curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key \
-          | sudo gpg --no-tty --batch --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+        # === Ensure keyring directory exists ===
+        echo "Creating APT keyring directory if not exists..."
+        sudo mkdir -p /etc/apt/keyrings
+        # Significance: Prevents "No such file or directory" if keyrings dir is missing
 
-        echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /' \
-          | sudo tee /etc/apt/sources.list.d/kubernetes.list
+        # === Remove any corrupted or stale Kubernetes GPG key ===
+        echo "Removing any existing (possibly corrupted) Kubernetes GPG key..."
+        sudo rm -f /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+        # Significance: Avoids "File exists" error from gpg when re-running job
 
+        # === Download and install Kubernetes APT signing key (with retry) ===
+        echo "Downloading Kubernetes APT repository signing key (attempting up to 3 times)..."
+        for attempt in {1..3}; do
+          if curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | \
+            sudo gpg --no-tty --batch --yes --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg; then
+            echo "Kubernetes GPG key successfully installed."
+            break
+          else
+            echo "Attempt $attempt failed. Retrying in 2 seconds..."
+            sleep 2
+          fi
+          [ $attempt -eq 3 ] && { echo "Failed to download GPG key after 3 attempts."; exit 1; }
+        done
+        # Significance:
+        # - curl -fsSL: Fail on HTTP error, follow redirects, silent mode
+        # - --yes: Forces overwrite (safe because we deleted file above)
+        # - Retry loop: Handles transient network issues common in CI
+        # - Key is required to verify authenticity of kubectl packages
+
+        # === Add Kubernetes APT repository ===
+        echo "Adding Kubernetes APT repository to sources list..."
+        echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /' | \
+          sudo tee /etc/apt/sources.list.d/kubernetes.list > /dev/null
+        # Significance:
+        # - Uses modern keyring-based signing (more secure than deprecated keyserver method)
+        # - Enables installation of official kubectl from Kubernetes project
+
+        # === Update package index again to include Kubernetes repo ===
+        echo "Refreshing APT cache with new Kubernetes repository..."
         sudo apt-get update -y
+        # Significance: Must run again after adding new repo so `apt` sees `kubectl`
+
+        # === Install kubectl ===
+        echo "Installing kubectl (Kubernetes CLI)..."
         sudo apt-get install -y kubectl
+        # Significance: Core tool for interacting with Kubernetes clusters
+
+        # === Install Helm (Kubernetes package manager) ===
+        echo "Installing Helm via official installation script..."
         curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-        curl -sSL "https://github.com/buildpacks/pack/releases/download/v0.38.2/pack-v0.38.2-linux.tgz" \
-          | sudo tar -C /usr/local/bin/ --no-same-owner -xzv pack
+        # Significance:
+        # - Downloads and runs official Helm installer
+        # - Installs latest stable Helm v3
+        # - Used for deploying applications via charts
+
+        # === Install Cloud Native Buildpacks 'pack' CLI ===
+        echo "Installing 'pack' CLI (v0.38.2) for building container images..."
+        curl -sSL "https://github.com/buildpacks/pack/releases/download/v0.38.2/pack-v0.38.2-linux.tgz" | \
+          sudo tar -C /usr/local/bin/ --no-same-owner -xzv pack
+        # Significance:
+        # - pack: CLI for building OCI images using Cloud Native Buildpacks
+        # - --no-same-owner: Avoids permission issues in containerized runners
+        # - Direct install to /usr/local/bin: Makes it available in PATH
+
+        # === Install 'ctz' CLI globally via npm ===
+        echo "Installing 'ctz' CLI globally using npm..."
         npm install -g ctz
 
+        echo "All tools installed successfully: kubectl, helm, pack, ctz"
     # --------------------------
     # 2 Log in to Buildpack Registry
     # --------------------------
