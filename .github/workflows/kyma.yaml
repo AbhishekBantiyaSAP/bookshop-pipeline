@@ -48,7 +48,7 @@ jobs:
         shell: bash
         run: |
           export KUBECONFIG=${HOME}/.kube/config
-          kubelogin convert-kubeconfig -l spn
+          kubelogin convert-kubeconfig --login spn
 
       - run: npx cds up --to k8s
 
