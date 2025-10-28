@@ -1,0 +1,80 @@
+name: Kyma Setup
+description: "Installs dependencies and logs in to registries for Kyma deployment"
+
+inputs:
+  # --- Registries ---
+  buildpack-registry:
+    description: Buildpack Image Registry (e.g., jfrog.io/buildpacks)
+    required: true
+  buildpack-registry-user:
+    description: Username for buildpack registry
+    required: true
+  buildpack-registry-password:
+    description: Password/Token for buildpack registry
+    required: true
+
+  registry:
+    description: Container Image Registry (e.g., docker.io, ghcr.io, jfrog.io)
+    required: true
+  user:
+    description: Registry User
+    required: true
+  password:
+    description: Registry Password or Token
+    required: true
+
+  kube-config:
+    description: Base64-encoded Kubernetes Config
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    # --------------------------
+    # 1 Install Binaries
+    # --------------------------
+    - name: Install required tools
+      shell: bash
+      run: |
+        set -e
+        sudo apt-get update -y
+        sudo apt-get install -y software-properties-common curl ca-certificates sudo make maven docker.io
+        curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key \
+          | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+        echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /' \
+          | sudo tee /etc/apt/sources.list.d/kubernetes.list
+        sudo apt-get update -y
+        sudo apt-get install -y kubectl
+        curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+        curl -sSL "https://github.com/buildpacks/pack/releases/download/v0.38.2/pack-v0.38.2-linux.tgz" \
+          | sudo tar -C /usr/local/bin/ --no-same-owner -xzv pack
+        npm install -g ctz
+
+    # --------------------------
+    # 2 Log in to Buildpack Registry
+    # --------------------------
+    - name: Log in to Buildpack Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ inputs.buildpack-registry }}
+        username: ${{ inputs.buildpack-registry-user }}
+        password: ${{ inputs.buildpack-registry-password }}
+
+    # --------------------------
+    # 3 Log in to Image Registry
+    # --------------------------
+    - name: Log in to Image Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ inputs.registry }}
+        username: ${{ inputs.user }}
+        password: ${{ inputs.password }}
+
+    # --------------------------
+    # 4 Configure Kubernetes
+    # --------------------------
+    - name: Configure kubeconfig
+      shell: bash
+      run: |
+        mkdir -p ${HOME}/.kube
+        echo "${{ inputs.kube-config }}" | base64 --decode > ${HOME}/.kube/config

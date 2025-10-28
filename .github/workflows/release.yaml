@@ -1,0 +1,21 @@
+# name: Release
+
+# on:
+#   workflow_dispatch:
+#   release:
+#     types: [published]
+
+# permissions:
+#   contents: read
+#   deployments: write
+
+# jobs:
+#   tests:
+#      uses: AbhishekBantiyaSAP/bookshop-pipeline/.github/workflows/test.yaml@main
+#      secrets: inherit
+#   deploy-kyma:
+#     needs: [tests]
+#     uses: AbhishekBantiyaSAP/bookshop-pipeline/.github/workflows/kyma.yaml@main
+#     secrets: inherit
+#     with:
+#       environment: Production

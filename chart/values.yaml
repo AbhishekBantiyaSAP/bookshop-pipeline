@@ -6,7 +6,7 @@ global:
     name: docker-registry
   image:
     registry: docker.io/abhishekbantiya
-    tag: v1
+    tag: v2
 srv:
   bindings:
     auth:

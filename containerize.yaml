@@ -1,6 +1,6 @@
 _schema-version: '1.0'
 repository: docker.io/abhishekbantiya
-tag: v1
+tag: v2
 before-all:
   - npx cds build --production
   - mkdir -p app/html5-deployer/resources
