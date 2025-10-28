@@ -120,6 +120,7 @@ runs:
         # === Install 'ctz' CLI globally via npm ===
         echo "Installing 'ctz' CLI globally using npm..."
         npm install -g ctz
+        npm install -g @sap/cds-dk
 
         echo "All tools installed successfully: kubectl, helm, pack, ctz"
     # --------------------------
