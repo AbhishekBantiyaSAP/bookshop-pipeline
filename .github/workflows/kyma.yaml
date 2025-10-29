@@ -36,20 +36,6 @@ jobs:
           kube-config: ${{ secrets.KUBE_CONFIG }}
       - run: npm clean-install
 
-      # 🔧 install kubelogin for OIDC authentication
-      - name: Install kubelogin
-        run: |
-          curl -sSL https://github.com/int128/kubelogin/releases/latest/download/kubelogin_linux_amd64.zip -o kubelogin.zip
-          unzip kubelogin.zip -d /usr/local/bin
-          chmod +x /usr/local/bin/kubelogin
-          ln -s /usr/local/bin/kubelogin /usr/local/bin/kubectl-oidc_login
-      
-      - name: Prepare kubeconfig for CI
-        shell: bash
-        run: |
-          export KUBECONFIG=${HOME}/.kube/config
-          kubelogin convert-kubeconfig --login spn
-
       - run: npx cds up --to k8s
 
       - uses: ./.github/actions/kyma-info
