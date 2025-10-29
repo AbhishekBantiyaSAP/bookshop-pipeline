@@ -38,7 +38,7 @@ jobs:
 
       - run: npx cds up --to k8s
 
-      - uses: ./.github/actions/kyma-info
-        if: always()
-        with:
-          app: ${{ env.APP_NAME }}
+      # - uses: ./.github/actions/kyma-info
+      #   if: always()
+      #   with:
+      #     app: ${{ env.APP_NAME }}
