@@ -3,10 +3,10 @@
 global:
   domain: c-50942a7.stage.kyma.ondemand.com
   imagePullSecret:
-    name: docker-registry
+    name: jfrog-regcred
   image:
-    registry: docker.io/abhishekbantiya
-    tag: v2
+    registry: content-agent.common.repositories.cloud.sap/i528716/bookshop-gha
+    tag: v1
 srv:
   bindings:
     auth:

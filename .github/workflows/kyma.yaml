@@ -28,10 +28,10 @@ jobs:
       - uses: ./.github/actions/kyma-setup
         with:
           buildpack-registry: ${{ vars.BUILDPACK_REGISTRY }}
-          buildpack-registry-user: ${{ vars.BUILDPACK_USERNAME }}
+          buildpack-registry-user: ${{ vars.USERNAME }}
           buildpack-registry-password: ${{ secrets.BUILDPACK_PASSWORD }}
           registry: ${{ vars.DOCKER_REGISTRY }}
-          user: ${{ vars.DOCKER_USERNAME }}
+          user: ${{ vars.USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           kube-config: ${{ secrets.KUBE_CONFIG }}
       - run: npm clean-install

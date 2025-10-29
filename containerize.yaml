@@ -1,6 +1,6 @@
 _schema-version: '1.0'
-repository: docker.io/abhishekbantiya
-tag: v2
+repository: content-agent.common.repositories.cloud.sap/i528716/bookshop-gha
+tag: v1
 before-all:
   - npx cds build --production
   - mkdir -p app/html5-deployer/resources
