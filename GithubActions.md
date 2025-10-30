@@ -18,6 +18,11 @@
         - Template = Secrets: `kubernetes.io/service-account-token`
         - Under `Annotations` : Enter name of the above create created service account as value to the key `kubernetes.io/service-account.name`
         - Once secret is created you can find `ca.crt` and `token` under Data
+        - Under Configuration, go to **Roles** and create a role with appropriate permissions. For simplicity, I have create a role with the template all permissions
+        - Under Configuration, go to `Role Bindings`
+            - Give an appropriate name to binding, Select Role type as `Role` and Kind as `ServiceAcccount`.
+            - Provide the service acccount **name** and **namespace** under the ServiceAccount section.
+            - This creates a **role binding** to the create Service Account
     - Create a yaml file with the configuration mentioned below so that you can set it as a secret in the github actions
         ```yaml
         ---
