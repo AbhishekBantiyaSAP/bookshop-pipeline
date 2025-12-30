@@ -38,6 +38,14 @@ jobs:
 
       - run: npx cds up --to k8s
 
+      - name: Upload resources folder as artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: html5-deployer-resources
+          path: app/html5-deployer/resources/
+          retention-days: 7
+
       # - uses: ./.github/actions/kyma-info
       #   if: always()
       #   with:
