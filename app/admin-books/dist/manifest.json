@@ -54,6 +54,15 @@
 				"sap.fe.templates": {}
 			}
 		},
+		"extends": {
+			"extensions": {
+				"sap.ui.controllerExtensions": {
+					"sap.fe.templates.ListReport.ListReportController": {
+						"controllerName": "books.ext.controller.ListReportExt"
+					}
+				}
+			}
+		},
 		"models": {
 			"i18n": {
 				"type": "sap.ui.model.resource.ResourceModel",
@@ -107,6 +116,22 @@
 						"settings": {
 							"entitySet": "Books",
 							"initialLoad": true,
+							"controlConfiguration": {
+								"@com.sap.vocabularies.UI.v1.LineItem": {
+									"actions": {
+										"DummyInfo": {
+											"text": "{i18n>dummyInfoAction}",
+											"press": "books.ext.controller.ListReportExt.onDummyInfo",
+											"requiresSelection": false
+										},
+										"DummySelected": {
+											"text": "{i18n>dummySelectedAction}",
+											"press": "books.ext.controller.ListReportExt.onDummySelected",
+											"requiresSelection": true
+										}
+									}
+								}
+							},
 							"navigation": {
 								"Books": {
 									"detail": {

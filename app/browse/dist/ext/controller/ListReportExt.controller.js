@@ -1,0 +1,2 @@
+sap.ui.define(["sap/ui/core/mvc/ControllerExtension","sap/m/MessageToast"],function(e,t){"use strict";return e.extend("bookshop.ext.controller.ListReportExt",{onDummyInfo:function(){t.show("Dummy component action from Browse app")},onDummySelected:function(){var e=this.base.getExtensionAPI().getSelectedContexts();t.show("Selected items: "+e.length)}})});
+//# sourceMappingURL=ListReportExt.controller.js.map
