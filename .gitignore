@@ -28,7 +28,7 @@ mta_archives/
 
 # IDEs
 # .vscode
-# .idea
+.idea
 
 # @cap-js/cds-typer
 @cds-models
