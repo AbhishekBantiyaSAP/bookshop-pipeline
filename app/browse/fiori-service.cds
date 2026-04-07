@@ -38,7 +38,6 @@ annotate CatalogService.Books with @(UI: {
 annotate CatalogService.Books with @(UI: {
   SelectionFields: [
     ID,
-    price,
     currency_code
   ],
   LineItem       : [
